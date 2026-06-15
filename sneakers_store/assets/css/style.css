@@ -1,0 +1,334 @@
+/* =========================================================
+   GLOBAL RESET & TYPOGRAPHY
+   Mimicking Nike's clean, modern sans-serif aesthetic
+========================================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* Uses system fonts to get that crisp, Helvetica-style look */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #ffffff;
+    color: #111111;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: #111111;
+}
+
+/* =========================================================
+   NAVIGATION BAR (header.php)
+========================================================= */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 0 40px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo a {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    gap: 24px;
+}
+
+.nav-links a {
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 4px;
+    transition: border-color 0.2s ease;
+}
+
+.nav-links a:hover {
+    border-bottom: 2px solid #111111;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Nike-style Search Bar */
+.search-bar {
+    padding: 10px 40px 10px 16px;
+    background-color: #f5f5f5;
+    border: none;
+    border-radius: 100px; /* Pill shape */
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.search-bar:hover, .search-bar:focus {
+    background-color: #e5e5e5;
+}
+
+.btn-icon {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+    background-color: #f5f5f5;
+}
+
+/* =========================================================
+   HOMEPAGE HERO SECTION (index.php)
+========================================================= */
+.hero-section {
+    position: relative;
+    height: 80vh;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Pushes text to the bottom */
+    align-items: center;
+    background-color: #f5f5f5;
+    background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    padding-bottom: 60px;
+}
+
+.hero-text {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 40px 60px;
+    border-radius: 4px;
+}
+
+.hero-text h1 {
+    font-size: 72px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 16px;
+}
+
+.hero-text p {
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+/* Nike's signature pill buttons */
+.btn-primary {
+    display: inline-block;
+    background-color: #111111;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #707070;
+}
+
+/* =========================================================
+   PRODUCT GRID (index.php & browse.php)
+========================================================= */
+.section-title {
+    font-size: 24px;
+    font-weight: 500;
+    padding: 0 40px;
+    margin: 40px 0 20px 0;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 0 40px 60px 40px;
+}
+
+/* Borderless cards, relying on image size and whitespace */
+.product-card {
+    display: block;
+    cursor: pointer;
+}
+
+.image-container {
+    background-color: #f6f6f6;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.product-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.03); /* Subtle zoom effect */
+}
+
+.product-card h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.product-card .category {
+    color: #707070;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.product-card .price {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+/* =========================================================
+   BROWSE PAGE SPECIFICS (browse.php)
+========================================================= */
+.browse-container {
+    display: flex;
+    padding: 0 40px;
+    margin-top: 40px;
+}
+
+.sidebar-filters {
+    width: 260px;
+    padding-right: 40px;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+}
+
+.filter-group h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.filter-group a {
+    display: block;
+    font-size: 16px;
+    color: #111;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.filter-group a:hover {
+    color: #707070;
+}
+
+/* =========================================================
+   DASHBOARD SIDEBAR (sidebar.php)
+   Nike Aesthetic: Clean, borderless, typography-focused
+========================================================= */
+.sidebar {
+    width: 260px;
+    background-color: #ffffff;
+    border-right: 1px solid #e5e5e5; /* Subtle separation instead of heavy shadow */
+    display: flex;
+    flex-direction: column;
+    padding: 40px 0 40px 40px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar-logo {
+    margin-bottom: 40px;
+}
+
+.sidebar-logo a {
+    font-size: 20px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: #111111;
+}
+
+.menu-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #707070;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1; /* Pushes the footer to the bottom */
+}
+
+.sidebar a {
+    font-size: 16px;
+    font-weight: 500;
+    color: #707070;
+    padding: 8px 0;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-block;
+    width: fit-content;
+}
+
+/* Nike hover effect: Text goes black */
+.sidebar a:hover {
+    color: #111111;
+}
+
+/* The Active State: Bold black text with a subtle left indicator */
+.sidebar a.active {
+    color: #111111;
+    font-weight: 700;
+    position: relative;
+}
+
+.sidebar a.active::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #111111;
+    border-radius: 50%;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #e5e5e5;
+    margin-right: 40px; /* Aligns border with text */
+}
+
+.logout-link {
+    color: #111111 !important;
+    font-weight: 700 !important;
+}
