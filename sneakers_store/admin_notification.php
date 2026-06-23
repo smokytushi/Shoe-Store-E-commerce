@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION[
     exit();
 }
 
-require_once 'db_connect.php';
+require_once 'includes/db_connect.php';
 
 $success_msg = '';
 $error_msg = '';

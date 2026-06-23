@@ -3,7 +3,7 @@
 session_start();
 
 // Include your database connection
-require_once 'db_connect.php';
+require_once 'includes/db_connect.php';
 
 // Initialize variables to hold error or success messages
 $error_msg = '';

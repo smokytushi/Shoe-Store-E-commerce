@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
 }
 
 // Include database connection
-require_once 'db_connect.php';
+require_once 'includes/db_connect.php';
 
 // Fetch specific user data to personalize the dashboard
 $user_id = $_SESSION['user_id'];
