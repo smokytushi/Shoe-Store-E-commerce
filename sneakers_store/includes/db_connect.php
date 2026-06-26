@@ -21,7 +21,3 @@ try {
     die("Database connection failed. Please contact the system administrator.");
 }
 ?>
-
-
-//require_once 'db_connect.php'; add to other file to connect 
-

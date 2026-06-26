@@ -137,7 +137,7 @@ $low_stock_alerts = 0; // You can build logic for this later!
 </head>
 <body>
 
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="header-flex">
