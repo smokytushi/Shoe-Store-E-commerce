@@ -1,4 +1,7 @@
-<?php include 'header.php'; ?>
+<?php 
+require_once 'includes/db_connect.php';
+include 'includes/header.php'; 
+?>
 
 <style>
     /* Specific CSS for Homepage */
@@ -59,6 +62,7 @@
     .price { font-weight: bold; color: #555; }
 </style>
 
+<div class="hero-section">
     <div class="hero-text">
         <h1>Never Stop<br>Inspiring</h1>
         <p>Explore the latest collections built for comfort, style, and performance.</p>

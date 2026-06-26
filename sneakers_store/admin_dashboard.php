@@ -1,18 +1,28 @@
 <?php
-// Strict Admin Gatekeeper
+
+// ===================================
+// Session & Role-Based Access Control
+// ===================================
 session_start();
 
 // Check if user is logged in AND has admin privileges
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'system_admin')) {
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin')) {
     header("Location: login.php");
     exit();
 }
 
+// ===================================
+// Database connection
+// ===================================
 require_once 'includes/db_connect.php';
 
+// ===================================
 // Fetch Inventory Data securely
+// ===================================
 $products = [];
-$sql = "SELECT sku, product_name, category, stock_quantity FROM products ORDER BY created_at DESC";
+$sql = "SELECT sku, product_name, product_description, stock_quantity 
+        FROM products 
+        ORDER BY created_at DESC";
 
 if ($result = $conn->query($sql)) {
     while ($row = $result->fetch_assoc()) {
@@ -21,9 +31,48 @@ if ($result = $conn->query($sql)) {
     $result->free();
 }
 
-// Admin placeholder metrics
+// ==========================================
+// ADMIN DASHBOARD ANALYTICS
+// ==========================================
+
+// Total Inventory Value
+$total_inventory_value = 0;
+
+// ==========================================
+// CALCULATE TOTAL INVENTORY VALUE
+// Formula:
+// Product Price × Stock Quantity
+// ==========================================
+
+$sql = "
+SELECT
+SUM(price * stock_quantity)
+AS inventory_value
+FROM products
+";
+
+$result = $conn->query($sql);
+
+if($row = $result->fetch_assoc()){
+
+$total_inventory_value =
+$row['inventory_value'];
+
+}
+
+// ===================================
+// Admin dashboard metrics
+// ===================================
 $total_inventory = count($products);
+
 $low_stock_alerts = 0; // You can build logic for this later!
+
+foreach ($products as $product) {
+    if ($product['stock_quantity'] < 10) {
+        $low_stock_alerts++;
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -142,17 +191,30 @@ $low_stock_alerts = 0; // You can build logic for this later!
     <div class="main-content">
         <div class="header-flex">
             <h1>INVENTORY DASHBOARD</h1>
-            <div>Hello Admin! <strong>Managing Stock</strong></div>
+            <div>
+                Hello <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>!
+            </div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Products</h3>
-                <p style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0;"><?php echo $total_inventory; ?></p>
+                    <p style="font-size:24px;font-weight:bold;">
+                        <?php echo $total_inventory; ?>
+                    </p>
             </div>
             <div class="stat-card">
+                <h3>Total Inventory Value</h3>
+                    <p style="font-size:24px;font-weight:bold;color:#27ae60;">
+                        RM <?php echo number_format($total_inventory_value,2); ?>
+                    </p>
+            </div>
+            
+            <div class="stat-card">
                 <h3>Low Stock Alerts</h3>
-                <p style="font-size: 24px; font-weight: bold; margin: 5px 0 0 0; color: #cc0000;"><?php echo $low_stock_alerts; ?></p>
+                    <p style="font-size:24px;font-weight:bold;color:#cc0000;">
+                        <?php echo $low_stock_alerts; ?> Products
+                    </p>
             </div>
         </div>
 
@@ -167,7 +229,7 @@ $low_stock_alerts = 0; // You can build logic for this later!
                         <tr>
                             <th>Item ID</th>
                             <th>Product Name</th>
-                            <th>Category</th>
+                            <th>Product Description</th>
                             <th>Quantity</th>
                         </tr>
                     </thead>
@@ -176,7 +238,7 @@ $low_stock_alerts = 0; // You can build logic for this later!
                         <tr>
                             <td><?php echo htmlspecialchars($product['sku']); ?></td>
                             <td><?php echo htmlspecialchars($product['product_name']); ?></td>
-                            <td><?php echo htmlspecialchars($product['category']); ?></td>
+                            <td><?php echo htmlspecialchars($product['product_description']); ?></td>
                             <td><strong><?php echo htmlspecialchars($product['stock_quantity']); ?></strong></td>
                         </tr>
                         <?php endforeach; ?>
@@ -202,5 +264,8 @@ $low_stock_alerts = 0; // You can build logic for this later!
         </div>
     </div>
 
+    <?php
+    $conn->close();
+    ?>
 </body>
 </html>
