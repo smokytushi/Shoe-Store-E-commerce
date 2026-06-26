@@ -1,91 +1,200 @@
-<?php include 'includes/header.php'; ?>
+<?php
+
+include 'includes/header.php';
+require_once 'includes/db_connect.php';
+
+$search   = $_GET['search']   ?? '';
+$category = $_GET['category'] ?? '';
+$sort     = $_GET['sort']     ?? 'newest';
+
+// Fetch categories for sidebar
+$categories = $conn->query("SELECT * FROM categories ORDER BY category_name");
+
+// Build product query
+$sql = "
+    SELECT p.*, c.category_name
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.category_id
+    WHERE 1=1
+";
+
+$params = [];
+$types  = "";
+
+if ($search !== "") {
+    $sql .= " AND (
+        p.product_name        LIKE ? OR
+        p.product_description LIKE ? OR
+        c.category_name       LIKE ?
+    )";
+    $keyword  = "%" . $search . "%";
+    $params[] = $keyword;
+    $params[] = $keyword;
+    $params[] = $keyword;
+    $types   .= "sss";
+}
+
+if ($category !== "") {
+    $sql    .= " AND p.category_id = ?";
+    $params[] = $category;
+    $types   .= "i";
+}
+
+switch ($sort) {
+    case "price_low":  $sql .= " ORDER BY p.price ASC";         break;
+    case "price_high": $sql .= " ORDER BY p.price DESC";        break;
+    case "name":       $sql .= " ORDER BY p.product_name ASC";  break;
+    default:           $sql .= " ORDER BY p.created_at DESC";
+}
+
+$stmt = $conn->prepare($sql);
+if (count($params) > 0) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
+?>
+
 
 <style>
-    .hero-section {
-        display: flex;
-        background-color: #e3e8e5; /* Light blue/green hero background */
-        height: 400px;
-        margin-bottom: 40px;
-    }
-    .hero-img {
-        flex: 1;
-        background-color: #ddd;
-        /* Replace with actual banner image URLs later */
-        background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');
-        background-size: cover;
-        background-position: center;
-    }
-    .hero-text {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 40px;
-    }
-    .hero-text h1 { font-size: 40px; margin: 0 0 10px 0; }
-    
-    .section-title { text-align: center; margin-bottom: 30px; font-size: 28px; }
-    
-    .product-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto 50px auto;
-        padding: 0 20px;
-    }
-    .product-card {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        text-decoration: none;
-        color: #333;
-        transition: transform 0.2s;
-    }
-    .product-card:hover { transform: translateY(-5px); }
-    .product-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        margin-bottom: 15px;
-        border-radius: 4px;
-        background-color: #f9f9f9;
-    }
-    .price { font-weight: bold; color: #555; }
+.catalogue{
+display:grid;
+grid-template-columns:250px 1fr;
+gap:40px;
+max-width:1400px;
+margin:auto;
+padding:30px;
+}
+
+.sidebar h3{
+margin-bottom:20px;
+}
+
+.sidebar a{
+display:block;
+padding:10px 0;
+text-decoration:none;
+color:#222;
+}
+
+.sidebar a:hover{
+font-weight:bold;
+}
+
+.toolbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.search-box{
+
+display:flex;
+gap:10px;
+
+}
+
+.search-box input{
+
+padding:10px;
+width:280px;
+
+}
+
+.product-grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:25px;
+
+}
+
+.product-card{
+
+text-decoration:none;
+color:#111;
+
+}
+
+.product-card img{
+
+width:100%;
+height:320px;
+object-fit:cover;
+background:#f5f5f5;
+
+}
+
+.category{
+
+color:#777;
+margin-top:10px;
+
+}
+
+.price{
+
+font-weight:bold;
+font-size:18px;
+
+}
 </style>
 
-<div class="hero-section">
-    <div class="hero-text">
-        <h1>Never Stop Inspiring</h1>
-        <p>Explore the latest collections built for comfort, style, and performance.</p>
+<div class="catalogue">
+
+  <div class="sidebar">
+    <h3>Categories</h3>
+    <a href="browse.php">All Products</a>
+    <?php while ($cat = $categories->fetch_assoc()): ?>
+      <a href="browse.php?category=<?= $cat['category_id'] ?>">
+        <?= htmlspecialchars($cat['category_name']) ?>
+      </a>
+    <?php endwhile; ?>
+  </div>
+
+  <div>
+    <div class="toolbar">
+
+      <form class="search-box" method="GET">
+        <input type="text" name="search"
+               placeholder="Search shoes..."
+               value="<?= htmlspecialchars($search) ?>">
+        <?php if ($category !== ""): ?>
+          <input type="hidden" name="category" value="<?= $category ?>">
+        <?php endif; ?>
+        <button>Search</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="search"   value="<?= htmlspecialchars($search) ?>">
+        <input type="hidden" name="category" value="<?= htmlspecialchars($category) ?>">
+        <select name="sort" onchange="this.form.submit()">
+          <option value="newest"     <?= $sort === "newest"     ? "selected" : "" ?>>Newest</option>
+          <option value="price_low"  <?= $sort === "price_low"  ? "selected" : "" ?>>Price Low → High</option>
+          <option value="price_high" <?= $sort === "price_high" ? "selected" : "" ?>>Price High → Low</option>
+          <option value="name"       <?= $sort === "name"       ? "selected" : "" ?>>Name A-Z</option>
+        </select>
+      </form>
+
     </div>
-    <div class="hero-img"></div>
-</div>
 
-<h2 class="section-title">New Arrivals</h2>
+    <div class="product-grid">
+      <?php while ($row = $result->fetch_assoc()):
+        $image = !empty($row['image_url'])
+               ? $row['image_url']
+               : "https://via.placeholder.com/400x400?text=No+Image";
+      ?>
+        <a class="product-card" href="product_details.php?id=<?= $row['product_id'] ?>">
+          <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($row['product_name']) ?>">
+          <div class="category"><?= htmlspecialchars($row['category_name']) ?></div>
+          <h3><?= htmlspecialchars($row['product_name']) ?></h3>
+          <div class="price">RM <?= number_format($row['price'], 2) ?></div>
+        </a>
+      <?php endwhile; ?>
+    </div>
 
-<div class="product-grid">
-    <?php
-    // Fetch 3 latest products
-    $sql = "SELECT product_id, product_name, price, image_url FROM products ORDER BY created_at DESC LIMIT 3";
-    if ($result = $conn->query($sql)) {
-        while ($row = $result->fetch_assoc()) {
-            // Use placeholder if image is missing
-            $img = !empty($row['image_url']) ? htmlspecialchars($row['image_url']) : 'https://via.placeholder.com/300x200?text=No+Image';
-            
-            echo '<a href="product_details.php?id=' . $row['product_id'] . '" class="product-card">';
-            echo '<img src="' . $img . '" class="product-image" alt="Sneaker">';
-            echo '<h3>' . htmlspecialchars($row['product_name']) . '</h3>';
-            echo '<p class="price">RM ' . number_format($row['price'], 2) . '</p>';
-            echo '</a>';
-        }
-        $result->free();
-    }
-    ?>
+  </div>
 </div>
 
 </body>

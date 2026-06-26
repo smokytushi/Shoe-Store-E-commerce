@@ -1,5 +1,6 @@
 <?php
 include 'includes/header.php';
+require_once 'includes/db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -63,14 +64,23 @@ if (isset($_POST['action']) && $_POST['action'] === 'update' && isset($_POST['pr
                                 <img src="assets/images/<?php echo htmlspecialchars($row['image_url']); ?>" class="product-image" style="width: 80px; height: 80px; object-fit: cover;" alt="Product">
                             </td>
                             <td style="padding: 15px;"><?php echo htmlspecialchars($row['product_name']); ?></td>
-                            <td style="padding: 15px;" class="item-price" data-price="<?php echo $price; ?>">RM <?php echo number_format($price, 2); ?></td>
+                            <td
+                                class="item-price"
+                                data-price="<?php echo $price; ?>"
+                                style="padding:15px;">
+
+                                RM <?php echo number_format($price,2); ?>
+
+                            </td>
                             <td style="padding: 15px;">
-                                <form method="POST" action="cart.php" style="display:inline;">
-                                    <input type="hidden" name="action" value="update">
-                                    <input type="hidden" name="product_id" value="<?php echo $pid; ?>">
-                                    <input type="number" name="quantity" value="<?php echo $qty; ?>" min="1" class="qty-input" style="width: 60px; padding: 5px;">
-                                    <button type="submit" style="padding: 5px 10px; cursor: pointer;">Update</button>
-                                </form>
+                                <input
+                                    type="number"
+                                    class="qty-input"
+                                    data-product-id="<?php echo $pid; ?>"
+                                    value="<?php echo $qty; ?>"
+                                    min="1"
+                                    max="20"
+                                    style="width:70px;padding:5px;">
                             </td>
                             <td style="padding: 15px;" class="item-subtotal">RM <?php echo number_format($subtotal, 2); ?></td>
                             <td style="padding: 15px;">
@@ -89,7 +99,15 @@ if (isset($_POST['action']) && $_POST['action'] === 'update' && isset($_POST['pr
             
             <tr>
                 <td colspan="4" style="padding: 15px; text-align: right; font-weight: bold;">Grand Total:</td>
-                <td colspan="2" style="padding: 15px; font-weight: bold; font-size: 1.2em;" id="grand-total">RM <?php echo number_format($grand_total, 2); ?></td>
+                <td colspan="2"
+                    style="padding:15px;font-weight:bold;font-size:1.2em;">
+
+                    Grand Total:
+                    <span id="grand-total">
+                        RM <?php echo number_format($grand_total,2); ?>
+                    </span>
+
+                </td>
             </tr>
         </table>
         
@@ -99,31 +117,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update' && isset($_POST['pr
     <?php endif; ?>
 </div>
 
-<script>
-document.querySelectorAll('.qty-input').forEach(function(input) {
-    input.addEventListener('input', function() {
-        var row = this.closest('tr');
-        var priceText = row.querySelector('.item-price').getAttribute('data-price');
-        var price = parseFloat(priceText);
-        var qty = parseInt(this.value);
-        
-        if (qty > 0) {
-            var subtotal = price * qty;
-            row.querySelector('.item-subtotal').innerHTML = 'RM ' + subtotal.toFixed(2);
-            
-            var newGrandTotal = 0;
-            document.querySelectorAll('.qty-input').forEach(function(inp) {
-                var p = parseFloat(inp.closest('tr').querySelector('.item-price').getAttribute('data-price'));
-                var q = parseInt(inp.value);
-                if(q > 0) {
-                    newGrandTotal += (p * q);
-                }
-            });
-            document.getElementById('grand-total').innerHTML = 'RM ' + newGrandTotal.toFixed(2);
-        }
-    });
-});
-</script>
+<script src="assets/js/cart.js"></script>
 
 </body>
 </html>

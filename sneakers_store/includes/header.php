@@ -10,7 +10,7 @@ require_once 'includes/db_connect.php';
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sneakers Store</title>
+    <title>HYPE Sneakers Store</title>
     <style>
         /* Vanilla CSS Global & Header Styles */
         body {
@@ -84,12 +84,12 @@ require_once 'includes/db_connect.php';
         
         <?php if(isset($_SESSION['user_id'])): ?>
             <?php if($_SESSION['role'] === 'customer'): ?>
-                <a href="user_dashboard.php" class="btn-icon">👤 Account</a>
+                <a href="user_dashboard.php" class="btn-icon">Account</a>
             <?php else: ?>
-                <a href="admin_dashboard.php" class="btn-icon">⚙️ Admin</a>
+                <a href="admin_dashboard.php" class="btn-icon">Admin</a>
             <?php endif; ?>
         <?php else: ?>
-            <a href="login.php" class="btn-icon">👤 Log In</a>
+            <a href="login.php" class="btn-icon">Log In</a>
         <?php endif; ?>
     </div>
 </div>

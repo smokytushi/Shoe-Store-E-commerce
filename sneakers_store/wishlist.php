@@ -1,5 +1,6 @@
 <?php
 include 'includes/header.php';
+require_once 'includes/db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -7,6 +8,36 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// Add product to wishlist
+if (isset($_POST['wishlist']) && isset($_POST['product_id'])) {
+
+    $product_id = intval($_POST['product_id']);
+
+    // Prevent duplicates
+    $check = $conn->prepare(
+        "SELECT product_id
+         FROM wishlist
+         WHERE user_id=? AND product_id=?"
+    );
+
+    $check->bind_param("ii", $user_id, $product_id);
+    $check->execute();
+
+    if ($check->get_result()->num_rows == 0) {
+
+        $insert = $conn->prepare(
+            "INSERT INTO wishlist(user_id, product_id)
+             VALUES(?, ?)"
+        );
+
+        $insert->bind_param("ii", $user_id, $product_id);
+        $insert->execute();
+    }
+
+    header("Location: wishlist.php");
+    exit();
+}
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];

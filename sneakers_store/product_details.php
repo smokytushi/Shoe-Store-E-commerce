@@ -1,111 +1,216 @@
-<?php include 'header.php'; ?>
+<?php
+include 'includes/header.php';
+require_once 'includes/db_connect.php';
+
+if(!isset($_GET['id'])){
+    die("Product not found.");
+}
+
+$product_id = intval($_GET['id']);
+
+$sql = "SELECT p.*, c.category_name
+        FROM products p
+        LEFT JOIN categories c
+        ON p.category_id = c.category_id
+        WHERE p.product_id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i",$product_id);
+$stmt->execute();
+
+$product = $stmt->get_result()->fetch_assoc();
+
+if(!$product){
+    die("Product not found.");
+}
+?>
 
 <style>
-    .browse-container {
-        display: flex;
-        max-width: 1200px;
-        margin: 40px auto;
-        padding: 0 20px;
-        gap: 30px;
-    }
-    .sidebar-filters {
-        width: 250px;
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        height: fit-content;
-    }
-    .filter-group { margin-bottom: 20px; }
-    .filter-group h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .filter-group a { display: block; color: #555; text-decoration: none; margin-bottom: 8px; }
-    .filter-group a:hover { color: #000; font-weight: bold; }
-    
-    .products-area { flex: 1; }
-    .page-title { margin-top: 0; font-size: 24px; margin-bottom: 20px; }
-    
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
-    }
-    .card {
-        background: #fff;
-        padding: 15px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; }
-    .card h4 { margin: 10px 0 5px 0; font-size: 16px; }
-    .card p { color: #555; font-weight: bold; margin: 0 0 15px 0; }
-    
-    .btn-buy {
-        display: inline-block;
-        background: #222;
-        color: #fff;
-        padding: 8px 15px;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-    .btn-buy:hover { background: #444; }
+.product-container{
+    width:90%;
+    margin:auto;
+    display:flex;
+    gap:60px;
+    padding:50px 0;
+}
+
+.product-image{
+    flex:1;
+}
+
+.product-image img{
+    width:100%;
+    border-radius:15px;
+    background:#f7f7f7;
+}
+
+.product-info{
+    width:430px;
+}
+
+.category{
+    color:#888;
+    font-size:18px;
+}
+
+.product-info h1{
+    font-size:40px;
+    margin:10px 0;
+}
+
+.product-info h2{
+    font-size:34px;
+    margin:20px 0;
+}
+
+.description{
+    color:#555;
+    line-height:1.8;
+    margin-bottom:25px;
+}
+
+.sizes{
+    margin:25px 0;
+}
+
+.sizes button{
+    width:55px;
+    height:55px;
+    margin-right:8px;
+    border:1px solid #ccc;
+    background:white;
+    cursor:pointer;
+    border-radius:8px;
+}
+
+.sizes button:hover{
+    background:black;
+    color:white;
+}
+
+.qty{
+    margin:20px 0;
+}
+
+.qty input{
+    width:90px;
+    padding:10px;
+    font-size:18px;
+}
+
+.cart-btn{
+
+    width:100%;
+    padding:18px;
+    background:black;
+    color:white;
+    border:none;
+    border-radius:50px;
+    font-size:18px;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.cart-btn:hover{
+    background:#222;
+}
+
+.wish-btn{
+
+    width:100%;
+    margin-top:15px;
+    padding:18px;
+    background:white;
+    border:1px solid #bbb;
+    border-radius:50px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.wish-btn:hover{
+    background:#f2f2f2;
+}
+
+.stock{
+    margin-top:20px;
+    color:green;
+    font-size:18px;
+}
 </style>
 
-<div class="browse-container">
-    <div class="sidebar-filters">
-        <div class="filter-group">
-            <h3>Categories</h3>
-            <a href="browse.php">All Sneakers</a>
-            <a href="browse.php?category=Men's Sneakers">Men's Sneakers</a>
-            <a href="browse.php?category=Women's Sneakers">Women's Sneakers</a>
-            <a href="browse.php?category=Kids">Kids</a>
-        </div>
+<body>
+<div class="product-container">
+
+    <div class="product-image">
+
+        <img src="assets/images/<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['product_name']) ?>">
+
     </div>
 
-    <div class="products-area">
-        <?php
-        // Determine search and filter parameters
-        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-        $category = isset($_GET['category']) ? trim($_GET['category']) : '';
-        
-        echo '<h1 class="page-title">';
-        if ($search) echo 'Search Results for "' . htmlspecialchars($search) . '"';
-        elseif ($category) echo htmlspecialchars($category);
-        else echo 'All Sneakers';
-        echo '</h1>';
-        
-        // Secure query building with Prepared Statements
-        $sql = "SELECT * FROM products WHERE product_name LIKE ? AND category LIKE ? ORDER BY created_at DESC";
-        
-        if ($stmt = $conn->prepare($sql)) {
-            $search_param = "%" . $search . "%";
-            $category_param = "%" . $category . "%";
-            
-            $stmt->bind_param("ss", $search_param, $category_param);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows > 0) {
-                echo '<div class="grid">';
-                while ($row = $result->fetch_assoc()) {
-                    $img = !empty($row['image_url']) ? htmlspecialchars($row['image_url']) : 'https://via.placeholder.com/300x200?text=No+Image';
-                    echo '<div class="card">';
-                    echo '<img src="' . $img . '" alt="Product">';
-                    echo '<h4>' . htmlspecialchars($row['product_name']) . '</h4>';
-                    echo '<p>RM ' . number_format($row['price'], 2) . '</p>';
-                    // Link to details page
-                    echo '<a href="product_details.php?id=' . $row['product_id'] . '" class="btn-buy">View Details</a>';
-                    echo '</div>';
-                }
-                echo '</div>';
-            } else {
-                echo '<p>No products found matching your criteria.</p>';
-            }
-            $stmt->close();
-        }
-        ?>
+    <div class="product-info">
+
+        <span class="category">
+            <?= htmlspecialchars($product['category_name']) ?>
+        </span>
+
+        <h1><?= htmlspecialchars($product['product_name']) ?></h1>
+
+        <h2>RM <?= number_format($product['price'],2) ?></h2>
+
+        <p class="description">
+            <?= nl2br(htmlspecialchars($product['product_description'])) ?>
+        </p>
+
+        <form action="cart.php" method="POST">
+
+            <input type="hidden"
+                   name="product_id"
+                   value="<?= $product['product_id'] ?>">
+
+            <div class="qty">
+
+                <label>Quantity</label>
+
+                <input type="number"
+                       name="quantity"
+                       value="1"
+                       min="1"
+                       max="<?= $product['stock_quantity'] ?>">
+
+            </div>
+
+            <button class="cart-btn"
+                    type="submit"
+                    name="add_cart">
+                Add to Cart
+            </button>
+
+        </form>
+
+        <form action="wishlist.php" method="POST">
+
+            <input type="hidden"
+                   name="product_id"
+                   value="<?= $product['product_id'] ?>">
+
+            <button class="wish-btn"
+                    type="submit"
+                    name="wishlist">
+                ♡ Add to Wishlist
+            </button>
+
+        </form>
+
+        <p class="stock">
+
+            <strong>Stock:</strong>
+
+            <?= $product['stock_quantity'] ?>
+
+        </p>
+
     </div>
+
 </div>
 
 </body>

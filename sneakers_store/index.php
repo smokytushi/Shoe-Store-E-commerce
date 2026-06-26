@@ -1,18 +1,18 @@
-<?php include 'header.php'; ?>
-
+<?php include 'includes/header.php'; 
+require_once 'includes/db_connect.php';
+?>
 <style>
     /* Specific CSS for Homepage */
     .hero-section {
         display: flex;
-        background-color: #e3e8e5; /* Light blue/green hero background */
+        background-color: #e3e8e5; 
         height: 400px;
         margin-bottom: 40px;
     }
     .hero-img {
         flex: 1;
         background-color: #ddd;
-        /* Replace with actual banner image URLs later */
-        background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');
+        background-image: url('assets/images/header.jpg');
         background-size: cover;
         background-position: center;
     }

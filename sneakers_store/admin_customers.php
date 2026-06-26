@@ -154,7 +154,7 @@ if ($result = $conn->query($fetch_sql)) {
 </head>
 <body>
 
-    <?php include 'includes/sidebar.php'; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="main-content">
         <div class="panel">
