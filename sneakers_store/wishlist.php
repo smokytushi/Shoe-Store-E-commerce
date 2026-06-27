@@ -78,7 +78,11 @@ $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 ?>
                 <div class="product-card">
-                    <img src="assets/images/<?php echo htmlspecialchars($row['image_url']); ?>" class="product-image" alt="Product Image">
+                <img src="<?php
+                    echo !empty($row['image_url'])
+                       ? 'assets/images/' . htmlspecialchars($row['image_url'])
+                       : 'assets/images/placeholder.jpg';
+                ?>" class="product-image" alt="<?php echo htmlspecialchars($row['product_name']); ?>">
                     <h3><?php echo htmlspecialchars($row['product_name']); ?></h3>
                     <p class="price">RM <?php echo number_format($row['price'], 2); ?></p>
                     

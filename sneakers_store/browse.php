@@ -182,11 +182,11 @@ font-size:18px;
     <div class="product-grid">
       <?php while ($row = $result->fetch_assoc()):
         $image = !empty($row['image_url'])
-               ? $row['image_url']
-               : "https://via.placeholder.com/400x400?text=No+Image";
+               ? 'assets/images/' . htmlspecialchars($row['image_url'])
+               : 'assets/images/placeholder.jpg';
       ?>
         <a class="product-card" href="product_details.php?id=<?= $row['product_id'] ?>">
-          <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($row['product_name']) ?>">
+          <img src="<?= $image ?>" alt="<?= htmlspecialchars($row['product_name']) ?>">
           <div class="category"><?= htmlspecialchars($row['category_name']) ?></div>
           <h3><?= htmlspecialchars($row['product_name']) ?></h3>
           <div class="price">RM <?= number_format($row['price'], 2) ?></div>

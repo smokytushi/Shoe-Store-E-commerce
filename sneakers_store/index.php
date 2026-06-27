@@ -1,4 +1,7 @@
-<?php include 'header.php'; ?>
+<?php 
+include 'includes/header.php';
+require_once 'includes/db_connect.php';
+?>
 
 <style>
     /* Specific CSS for Homepage */

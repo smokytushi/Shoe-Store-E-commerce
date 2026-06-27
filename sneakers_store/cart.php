@@ -11,6 +11,15 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
+// Add to cart (posted from product_details.php)
+if (isset($_POST['add_cart']) && isset($_POST['product_id'])) {
+    $pid = intval($_POST['product_id']);
+    $qty = max(1, intval($_POST['quantity'] ?? 1));
+    $_SESSION['cart'][$pid] = ($_SESSION['cart'][$pid] ?? 0) + $qty;
+    header("Location: cart.php");
+    exit();
+}
+
 if (isset($_POST['action']) && $_POST['action'] === 'remove' && isset($_POST['product_id'])) {
     $pid = $_POST['product_id'];
     unset($_SESSION['cart'][$pid]);
@@ -61,7 +70,12 @@ if (isset($_POST['action']) && $_POST['action'] === 'update' && isset($_POST['pr
                         ?>
                         <tr style="border-bottom: 1px solid #eee;">
                             <td style="padding: 15px;">
-                                <img src="assets/images/<?php echo htmlspecialchars($row['image_url']); ?>" class="product-image" style="width: 80px; height: 80px; object-fit: cover;" alt="Product">
+                                <img src="<?php
+                                    $img = !empty($row['image_url'])
+                                         ? 'assets/images/' . htmlspecialchars($row['image_url'])
+                                         : 'assets/images/placeholder.jpg';
+                                    echo $img;
+                                ?>" style="width: 80px; height: 80px; object-fit: cover;" alt="<?php echo htmlspecialchars($row['product_name']); ?>">
                             </td>
                             <td style="padding: 15px;"><?php echo htmlspecialchars($row['product_name']); ?></td>
                             <td
