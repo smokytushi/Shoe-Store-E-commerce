@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username) || empty($password)) {
         $error_msg = "Please enter both username and password.";
     } else {
-        // 2. Query the database securely using Prepared Statements
+        // Query the database securely using Prepared Statements
         $sql = "SELECT user_id, username, password_hash, role FROM users WHERE username = ?";
         
         if ($stmt = $conn->prepare($sql)) {
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bind_result($id, $db_username, $db_password_hash, $role);
                 $stmt->fetch();
                 
-                // 3. Verify the password against the hashed password in the database
+                // Verify the password against the hashed password in the database
                 if (password_verify($password, $db_password_hash)) {
                     // Password is correct! Initialize the session variables
                     $_SESSION['user_id'] = $id;
@@ -44,11 +44,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if ($_SESSION['role'] === 'admin') {
                         header("Location: admin_dashboard.php");
                     } elseif ($_SESSION['role'] === 'system_admin') {
-                        header("Location: system_admin.php"); // Or wherever you manage users
+                        header("Location: admin_dashboard.php"); 
                     } else {
-                        header("Location: user_dashboard.php"); // Default customer page
+                        header("Location: user_dashboard.php"); 
                     }
-                    exit(); // Ensure no further code is executed after redirection
+                    exit(); 
                 } else {
                     $error_msg = "Invalid username or password.";
                 }
@@ -70,7 +70,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In | Sneakers Store</title>
     <style>
-        /* Vanilla CSS - Matches your proposal wireframes perfectly */
         body {
             font-family: Arial, sans-serif;
             background-color: #e0e0e0;

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'system_admin')) {
+if (!isset($_SESSION['user_id']) || ( $_SESSION['role'] !== 'system_admin')) {
     header("Location: login.php");
     exit();
 }
@@ -154,7 +154,7 @@ if ($result = $conn->query($fetch_sql)) {
 </head>
 <body>
 
-    <?php include 'sidebar.php'; ?>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         <div class="panel">

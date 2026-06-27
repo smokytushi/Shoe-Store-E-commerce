@@ -1,57 +1,46 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'includes/db_connect.php';
 
-// Customer must be logged in
+// ── Guards ────────────────────────────────────────────────────────────────────
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
-// Customer must complete checkout first
 if (!isset($_SESSION['shipping'])) {
     header("Location: checkout.php");
     exit();
 }
+if (empty($_SESSION['cart'])) {
+    header("Location: cart.php");
+    exit();
+}
 
-$error_msg = "";
+$user_id  = $_SESSION['user_id'];
+$shipping = $_SESSION['shipping'];
+
+$error_msg      = "";
 $payment_method = "";
 
-$allowed_methods = [
-    "Credit Card",
-    "Online Banking",
-    "Atome"
-];
-
-$allowed_banks = [
-    "Maybank",
-    "CIMB Bank",
-    "Public Bank",
-    "RHB Bank",
-    "Hong Leong Bank",
-    "Bank Islam"
-];
+$allowed_methods = ["Credit Card", "Online Banking", "Atome"];
+$allowed_banks   = ["Maybank", "CIMB Bank", "Public Bank", "RHB Bank", "Hong Leong Bank", "Bank Islam"];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $payment_method = trim($_POST["payment_method"] ?? "");
 
+    // ── Validate payment method + its fields ──────────────────────────────────
     if (!in_array($payment_method, $allowed_methods, true)) {
         $error_msg = "Please select a valid payment method.";
-    } elseif ($payment_method === "Credit Card") {
-        $card_name = trim($_POST["card_name"] ?? "");
-        $card_number = preg_replace(
-            "/\D/",
-            "",
-            $_POST["card_number"] ?? ""
-        );
-        $expiry_date = trim($_POST["expiry_date"] ?? "");
-        $cvv = trim($_POST["cvv"] ?? "");
 
-        if (
-            $card_name === "" ||
-            $card_number === "" ||
-            $expiry_date === "" ||
-            $cvv === ""
-        ) {
+    } elseif ($payment_method === "Credit Card") {
+        $card_name   = trim($_POST["card_name"]   ?? "");
+        $card_number = preg_replace("/\D/", "", $_POST["card_number"] ?? "");
+        $expiry_date = trim($_POST["expiry_date"] ?? "");
+        $cvv         = trim($_POST["cvv"]         ?? "");
+
+        if ($card_name === "" || $card_number === "" || $expiry_date === "" || $cvv === "") {
             $error_msg = "Please complete all card information.";
         } elseif (!preg_match("/^[0-9]{13,19}$/", $card_number)) {
             $error_msg = "Please enter a valid card number.";
@@ -60,40 +49,124 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } elseif (!preg_match("/^[0-9]{3,4}$/", $cvv)) {
             $error_msg = "Please enter a valid CVV.";
         }
+
     } elseif ($payment_method === "Online Banking") {
         $bank_name = trim($_POST["bank_name"] ?? "");
-
         if (!in_array($bank_name, $allowed_banks, true)) {
             $error_msg = "Please select a valid bank.";
         }
+
     } elseif ($payment_method === "Atome") {
         $atome_phone = trim($_POST["atome_phone"] ?? "");
-
         if (!preg_match("/^[0-9+\-\s]{9,15}$/", $atome_phone)) {
             $error_msg = "Please enter a valid Atome phone number.";
         }
     }
 
+    // ── Save to database ──────────────────────────────────────────────────────
     if ($error_msg === "") {
-        // Mock transaction result
-        $transaction_reference =
-            "TXN-" .
-            date("YmdHis") .
-            "-" .
-            random_int(1000, 9999);
 
-        /*
-         * Do not store card numbers, CVV codes,
-         * or banking credentials in the session.
-         */
-        $_SESSION["payment"] = [
-            "payment_method" => $payment_method,
-            "payment_status" => "Completed",
-            "transaction_reference" => $transaction_reference
-        ];
+        // Build full shipping address string from session parts
+        $shipping_address = implode(', ', [
+            $shipping['address'],
+            $shipping['city'],
+            $shipping['postcode'],
+            $shipping['state']
+        ]);
 
-        header("Location: confirmation.php");
-        exit();
+        // ── 1. Fetch current prices from DB for all cart items ────────────────
+        // Never trust client-side prices — always re-read from DB at order time
+        $cart_ids  = implode(',', array_map('intval', array_keys($_SESSION['cart'])));
+        $price_res = $conn->query(
+            "SELECT product_id, price, stock_quantity FROM products WHERE product_id IN ($cart_ids)"
+        );
+
+        $product_prices = [];
+        $product_stock  = [];
+        while ($p = $price_res->fetch_assoc()) {
+            $product_prices[$p['product_id']] = $p['price'];
+            $product_stock[$p['product_id']]  = $p['stock_quantity'];
+        }
+
+        // Calculate real total
+        $grand_total = 0;
+        foreach ($_SESSION['cart'] as $pid => $qty) {
+            if (isset($product_prices[$pid])) {
+                $grand_total += $product_prices[$pid] * $qty;
+            }
+        }
+
+        // ── 2. Begin transaction ──────────────────────────────────────────────
+        $conn->begin_transaction();
+
+        try {
+            // ── 3. Insert into orders ─────────────────────────────────────────
+            $stmt = $conn->prepare("
+                INSERT INTO orders (user_id, total_amount, shipping_address, order_status)
+                VALUES (?, ?, ?, 'Pending')
+            ");
+            $stmt->bind_param("ids", $user_id, $grand_total, $shipping_address);
+            $stmt->execute();
+            $order_id = $conn->insert_id;
+            $stmt->close();
+
+            // ── 4. Insert into order_details + decrement stock ────────────────
+            $detail_stmt = $conn->prepare("
+                INSERT INTO order_details (order_id, product_id, quantity, price_at_purchase)
+                VALUES (?, ?, ?, ?)
+            ");
+            $stock_stmt = $conn->prepare("
+                UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?
+            ");
+
+            foreach ($_SESSION['cart'] as $pid => $qty) {
+                $pid   = intval($pid);
+                $qty   = intval($qty);
+                $price = $product_prices[$pid] ?? 0;
+
+                $detail_stmt->bind_param("iiid", $order_id, $pid, $qty, $price);
+                $detail_stmt->execute();
+
+                $stock_stmt->bind_param("ii", $qty, $pid);
+                $stock_stmt->execute();
+            }
+            $detail_stmt->close();
+            $stock_stmt->close();
+
+            // ── 5. Insert into payments ───────────────────────────────────────
+            $pay_stmt = $conn->prepare("
+                INSERT INTO payments (order_id, payment_method, payment_status)
+                VALUES (?, ?, 'Completed')
+            ");
+            $pay_stmt->bind_param("is", $order_id, $payment_method);
+            $pay_stmt->execute();
+            $pay_stmt->close();
+
+            // ── 6. Insert into delivery_status ────────────────────────────────
+            $expected = date('Y-m-d', strtotime('+5 weekdays'));
+            $del_stmt = $conn->prepare("
+                INSERT INTO delivery_status (order_id, expected_delivery, current_status)
+                VALUES (?, ?, 'Pending')
+            ");
+            $del_stmt->bind_param("is", $order_id, $expected);
+            $del_stmt->execute();
+            $del_stmt->close();
+
+            // ── 7. Commit transaction ─────────────────────────────────────────
+            $conn->commit();
+
+            // ── 8. Clear cart + shipping from session, save order_id ─────────
+            $_SESSION['cart']            = [];
+            $_SESSION['last_order_id']   = $order_id;
+            unset($_SESSION['shipping']);
+
+            header("Location: order_confirmation.php");
+            exit();
+
+        } catch (Exception $e) {
+            $conn->rollback();
+            $error_msg = "Order could not be placed. Please try again.";
+        }
     }
 }
 ?>

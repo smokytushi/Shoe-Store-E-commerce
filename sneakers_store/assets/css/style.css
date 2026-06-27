@@ -1,6 +1,5 @@
 /* =========================================================
    GLOBAL RESET & TYPOGRAPHY
-   Mimicking Nike's clean, modern sans-serif aesthetic
 ========================================================= */
 * {
     box-sizing: border-box;
@@ -153,59 +152,174 @@ a {
 /* =========================================================
    PRODUCT GRID (index.php & browse.php)
 ========================================================= */
-.section-title {
-    font-size: 24px;
-    font-weight: 500;
-    padding: 0 40px;
-    margin: 40px 0 20px 0;
+.catalogue-container{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:40px;
+    max-width:1600px;
+    margin:40px auto;
+    padding:0 40px 80px;
 }
 
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-    padding: 0 40px 60px 40px;
+/* Sidebar */
+
+.catalogue-sidebar{
+    position:sticky;
+    top:80px;
+    height:fit-content;
 }
 
-/* Borderless cards, relying on image size and whitespace */
-.product-card {
-    display: block;
-    cursor: pointer;
+.catalogue-sidebar h3{
+    font-size:22px;
+    margin-bottom:20px;
 }
 
-.image-container {
-    background-color: #f6f6f6;
-    overflow: hidden;
-    margin-bottom: 12px;
+.catalogue-sidebar ul{
+    list-style:none;
 }
 
-.product-image {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-    transition: transform 0.3s ease;
+.catalogue-sidebar li{
+    margin-bottom:12px;
 }
 
-.product-card:hover .product-image {
-    transform: scale(1.03); /* Subtle zoom effect */
+.catalogue-sidebar a{
+    display:block;
+    padding:10px 0;
+    color:#111;
+    font-weight:500;
+    transition:.2s;
 }
 
-.product-card h3 {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 4px;
+.catalogue-sidebar a:hover,
+.catalogue-sidebar a.active{
+    color:#777;
 }
 
-.product-card .category {
-    color: #707070;
-    font-size: 16px;
-    margin-bottom: 8px;
+/* Toolbar */
+
+.catalogue-toolbar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+    gap:20px;
+
 }
 
-.product-card .price {
-    font-weight: 500;
-    font-size: 16px;
+.search-form{
+
+    display:flex;
+    gap:10px;
+
 }
+
+.search-form input{
+
+    width:320px;
+    padding:12px 18px;
+    border:1px solid #ddd;
+    border-radius:30px;
+    font-size:15px;
+
+}
+
+.search-form button{
+
+    background:#111;
+    color:#fff;
+    border:none;
+    padding:12px 22px;
+    border-radius:30px;
+    cursor:pointer;
+
+}
+
+.search-form button:hover{
+
+    background:#333;
+
+}
+
+.sort-box select{
+
+    padding:10px 16px;
+    border-radius:30px;
+    border:1px solid #ddd;
+    cursor:pointer;
+
+}
+
+/* Product Cards */
+
+.catalogue-grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+gap:25px;
+
+}
+
+.catalogue-card{
+
+display:block;
+
+}
+
+.catalogue-image{
+
+background:#f6f6f6;
+overflow:hidden;
+aspect-ratio:1/1;
+
+}
+
+.catalogue-image img{
+
+width:100%;
+height:100%;
+object-fit:cover;
+transition:.35s;
+
+}
+
+.catalogue-card:hover img{
+
+transform:scale(1.05);
+
+}
+
+.catalogue-category{
+
+color:#757575;
+margin-top:12px;
+
+}
+
+.catalogue-name{
+
+font-size:18px;
+font-weight:600;
+margin:4px 0;
+
+}
+
+.catalogue-price{
+
+font-weight:bold;
+font-size:18px;
+
+}
+
+/* Hide Cards */
+
+.hide{
+
+display:none;
+
+}
+
 
 /* =========================================================
    BROWSE PAGE SPECIFICS (browse.php)
@@ -331,4 +445,58 @@ a {
 .logout-link {
     color: #111111 !important;
     font-weight: 700 !important;
+}
+
+.qty-control{
+
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+
+}
+
+.qty-btn{
+
+width:32px;
+height:32px;
+
+border:1px solid #ccc;
+
+background:white;
+
+cursor:pointer;
+
+font-size:20px;
+
+font-weight:bold;
+
+border-radius:50%;
+
+transition:.2s;
+
+}
+
+.qty-btn:hover{
+
+background:#111;
+
+color:white;
+
+}
+
+.qty-input{
+
+width:45px;
+
+text-align:center;
+
+border:none;
+
+font-size:16px;
+
+font-weight:bold;
+
+background:transparent;
+
 }

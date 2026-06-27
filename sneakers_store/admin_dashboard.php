@@ -1,27 +1,20 @@
 <?php
 
-// ===================================
-// Session & Role-Based Access Control
-// ===================================
+
 session_start();
 
-// Check if user is logged in AND has admin privileges
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin')) {
     header("Location: login.php");
     exit();
 }
 
-// ===================================
-// Database connection
-// ===================================
+
 require_once 'includes/db_connect.php';
 
-// ===================================
-// Fetch Inventory Data securely
-// ===================================
+
 $products = [];
-$sql = "SELECT sku, product_name, product_description, stock_quantity 
-        FROM products 
+$sql = "SELECT sku, product_name, product_description, stock_quantity
+        FROM products
         ORDER BY created_at DESC";
 
 if ($result = $conn->query($sql)) {
@@ -31,50 +24,21 @@ if ($result = $conn->query($sql)) {
     $result->free();
 }
 
-// ==========================================
-// ADMIN DASHBOARD ANALYTICS
-// ==========================================
-
-// Total Inventory Value
 $total_inventory_value = 0;
-
-// ==========================================
-// CALCULATE TOTAL INVENTORY VALUE
-// Formula:
-// Product Price × Stock Quantity
-// ==========================================
-
-$sql = "
-SELECT
-SUM(price * stock_quantity)
-AS inventory_value
-FROM products
-";
-
+$sql = "SELECT SUM(price * stock_quantity) AS inventory_value FROM products";
 $result = $conn->query($sql);
-
-if($row = $result->fetch_assoc()){
-
-$total_inventory_value =
-$row['inventory_value'];
-
+if ($row = $result->fetch_assoc()) {
+    $total_inventory_value = $row['inventory_value'];
 }
 
-// ===================================
-// Admin dashboard metrics
-// ===================================
 $total_inventory = count($products);
-
-$low_stock_alerts = 0; // You can build logic for this later!
-
+$low_stock_alerts = 0;
 foreach ($products as $product) {
     if ($product['stock_quantity'] < 10) {
         $low_stock_alerts++;
     }
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,72 +46,143 @@ foreach ($products as $product) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Sneakers Store</title>
     <style>
-        /* Vanilla CSS Architecture */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #eef8f2;
             display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
 
-        /* Reusable Sidebar Styling */
+        /* ── Top Header ── */
+        .top-header {
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            height: 60px;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .top-header .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+        .top-header nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+        }
+        .top-header nav a:hover { color: #111; }
+        .top-header .user-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* ── Body Layout ── */
+        .page-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* ── Sidebar ── */
         .sidebar {
-            width: 250px;
+            width: 220px;
+            min-width: 220px;
             background-color: #ffffff;
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             padding: 20px 0;
+            min-height: calc(100vh - 60px);
         }
-        .sidebar-logo {
-            font-size: 24px;
+        .sidebar-label {
+            font-size: 11px;
             font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
+            color: #aaa;
+            letter-spacing: 1px;
+            padding: 10px 25px 6px;
+            text-transform: uppercase;
         }
         .sidebar a {
-            padding: 15px 25px;
+            padding: 12px 25px;
             text-decoration: none;
             color: #555;
             display: block;
             border-left: 4px solid transparent;
+            font-size: 14px;
         }
-        .sidebar a:hover, .sidebar a.active {
+        .sidebar a:hover,
+        .sidebar a.active {
             background-color: #f0f0f0;
             border-left: 4px solid #333;
             font-weight: bold;
             color: #333;
         }
+        .sidebar .logout {
+            margin-top: auto;
+            padding: 12px 25px;
+            color: #cc0000;
+            font-size: 14px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar .logout:hover {
+            background-color: #fff0f0;
+            border-left-color: #cc0000;
+        }
 
-        /* Main Content */
+        /* ── Main Content ── */
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: 36px 40px;
         }
-        .header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 24px;
+            color: #222;
         }
-        .header-flex h1 { margin: 0; font-size: 28px; }
-        
+
+        /* ── Stat Cards ── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
         .stat-card {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 20px 24px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+        .stat-card h3 {
+            margin: 0 0 10px;
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* ── Dashboard Layout ── */
         .dashboard-layout {
             display: grid;
             grid-template-columns: 3fr 1fr;
@@ -155,26 +190,42 @@ foreach ($products as $product) {
         }
         .panel {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 24px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .panel-header h2 {
+            margin: 0;
+            font-size: 15px;
+            color: #333;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
         }
         th, td {
-            padding: 12px 10px;
+            padding: 11px 10px;
             text-align: left;
             border-bottom: 1px solid #eee;
+            font-size: 13px;
         }
-        th { color: #666; font-size: 14px; }
-        
-        /* Action Buttons */
+        th {
+            color: #777;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #eee;
+        }
+
         .btn-action {
-            padding: 6px 12px;
+            padding: 7px 14px;
             background-color: #222;
             color: white;
             text-decoration: none;
@@ -182,90 +233,116 @@ foreach ($products as $product) {
             font-size: 12px;
         }
         .btn-action:hover { background-color: #444; }
+
+        /* ── Stock Activity Feed ── */
+        .activity-item {
+            font-size: 13px;
+            color: #555;
+            border-left: 3px solid #222;
+            padding: 6px 10px;
+            margin-bottom: 12px;
+            background: #fafafa;
+            border-radius: 0 4px 4px 0;
+        }
     </style>
 </head>
 <body>
 
-    <?php include 'includes/sidebar.php'; ?>
-
-    <div class="main-content">
-        <div class="header-flex">
-            <h1>INVENTORY DASHBOARD</h1>
-            <div>
-                Hello <strong><?php echo htmlspecialchars($_SESSION['full_name']); ?></strong>!
-            </div>
+    <!-- ── Top Header ── -->
+    <header class="top-header">
+        <a href="index.php" class="logo">SNEAKERS STORE</a>
+        <nav>
+            <a href="index.php">All</a>
+            <a href="index.php?cat=men">Men</a>
+            <a href="index.php?cat=women">Women</a>
+            <a href="index.php?cat=kids">Kids</a>
+        </nav>
+        <div class="user-info">
+            Hello, <strong><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Admin'); ?></strong>
         </div>
+    </header>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Products</h3>
-                    <p style="font-size:24px;font-weight:bold;">
-                        <?php echo $total_inventory; ?>
+    <div class="page-wrapper">
+
+        <!-- ── Sidebar ── -->
+        <aside class="sidebar">
+            <div class="sidebar-label">Admin Controls</div>
+            <a href="admin_dashboard.php" class="active">Inventory</a>
+            <a href="admin_product.php">Products</a>
+            <a href="admin_orders.php">Orders</a>
+            <a href="admin_customers.php">Customers</a>
+            <a href="admin_marketing.php">Marketing</a>
+            <a href="logout.php" class="logout">Log Out</a>
+        </aside>
+
+        <!-- ── Main Content ── -->
+        <div class="main-content">
+            <h1 class="page-title">Inventory Dashboard</h1>
+
+            <!-- Stat Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Products</h3>
+                    <p class="stat-value"><?php echo $total_inventory; ?></p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Inventory Value</h3>
+                    <p class="stat-value" style="color:#27ae60;">
+                        RM <?php echo number_format($total_inventory_value, 2); ?>
                     </p>
-            </div>
-            <div class="stat-card">
-                <h3>Total Inventory Value</h3>
-                    <p style="font-size:24px;font-weight:bold;color:#27ae60;">
-                        RM <?php echo number_format($total_inventory_value,2); ?>
-                    </p>
-            </div>
-            
-            <div class="stat-card">
-                <h3>Low Stock Alerts</h3>
-                    <p style="font-size:24px;font-weight:bold;color:#cc0000;">
+                </div>
+                <div class="stat-card">
+                    <h3>Low Stock Alerts</h3>
+                    <p class="stat-value" style="color:#cc0000;">
                         <?php echo $low_stock_alerts; ?> Products
                     </p>
-            </div>
-        </div>
-
-        <div class="dashboard-layout">
-            <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; font-size: 18px;">CURRENT INVENTORY</h2>
-                    <a href="admin_product.php" class="btn-action">+ Add New Product</a>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item ID</th>
-                            <th>Product Name</th>
-                            <th>Product Description</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach($products as $product): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($product['sku']); ?></td>
-                            <td><?php echo htmlspecialchars($product['product_name']); ?></td>
-                            <td><?php echo htmlspecialchars($product['product_description']); ?></td>
-                            <td><strong><?php echo htmlspecialchars($product['stock_quantity']); ?></strong></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        
-                        <?php if(empty($products)): ?>
-                        <tr>
-                            <td colspan="4" style="text-align: center;">No products in inventory.</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="panel">
-                <h2 style="margin: 0 0 15px 0; font-size: 16px;">RECENT STOCK UPDATES</h2>
-                <div style="font-size: 13px; color: #555; border-left: 2px solid #222; padding-left: 10px; margin-bottom: 15px;">
-                    10 New sizes added to AJ1 High by Admin
-                </div>
-                <div style="font-size: 13px; color: #555; border-left: 2px solid #222; padding-left: 10px;">
-                    15 Units of Nike Dunk Low Panda sold
                 </div>
             </div>
-        </div>
-    </div>
 
-    <?php
-    $conn->close();
-    ?>
+            <!-- Inventory Table + Activity Feed -->
+            <div class="dashboard-layout">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Current Inventory</h2>
+                        <a href="admin_product.php" class="btn-action">+ Add New Product</a>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item ID</th>
+                                <th>Product Name</th>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($products as $product): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($product['sku']); ?></td>
+                                <td><?php echo htmlspecialchars($product['product_name']); ?></td>
+                                <td><?php echo htmlspecialchars($product['product_description']); ?></td>
+                                <td><strong><?php echo htmlspecialchars($product['stock_quantity']); ?></strong></td>
+                            </tr>
+                            <?php endforeach; ?>
+                            <?php if (empty($products)): ?>
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:#888;">No products in inventory.</td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="panel">
+                    <h2 style="margin:0 0 16px; font-size:15px; color:#333;">Recent Stock Updates</h2>
+                    <div class="activity-item">10 new sizes added to AJ1 High by Admin</div>
+                    <div class="activity-item">15 units of Nike Dunk Low Panda sold</div>
+                </div>
+            </div>
+
+        </div><!-- /main-content -->
+    </div><!-- /page-wrapper -->
+
+<?php $conn->close(); ?>
 </body>
 </html>

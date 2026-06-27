@@ -1,5 +1,6 @@
 <?php
-include 'includes/header.php';
+session_start();
+require_once 'includes/db_connect.php';
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'system_admin')) {
     header("Location: index.php");
@@ -15,21 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price = (float)$_POST['price'];
         $stock = (int)$_POST['stock_quantity'];
         $img = $conn->real_escape_string($_POST['image_url']);
-        
-        $sql = "INSERT INTO products (sku, product_name, product_description, category_id, price, stock_quantity, image_url) 
+
+        $sql = "INSERT INTO products (sku, product_name, product_description, category_id, price, stock_quantity, image_url)
                 VALUES ('$sku', '$name', '$desc', $cat_id, $price, $stock, '$img')";
         $conn->query($sql);
     }
-    
+
     if (isset($_POST['update_product'])) {
         $pid = (int)$_POST['product_id'];
         $price = (float)$_POST['price'];
         $stock = (int)$_POST['stock_quantity'];
-        
+
         $sql = "UPDATE products SET price = $price, stock_quantity = $stock WHERE product_id = $pid";
         $conn->query($sql);
     }
-    
+
     if (isset($_POST['delete_product'])) {
         $pid = (int)$_POST['product_id'];
         $sql = "DELETE FROM products WHERE product_id = $pid";
@@ -45,82 +46,341 @@ if ($cat_result) {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Products | Sneakers Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef8f2;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
-    <h2>Admin Catalog Management</h2>
-    
-    <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3>Add New Product</h3>
-        <form method="POST" action="admin_product.php" style="display: grid; gap: 15px; max-width: 600px;">
-            <input type="hidden" name="add_product" value="1">
-            
-            <input type="text" name="sku" placeholder="SKU (e.g. SNK-001)" required style="padding: 10px;">
-            <input type="text" name="product_name" placeholder="Product Name" required style="padding: 10px;">
-            <textarea name="product_description" placeholder="Description" rows="3" style="padding: 10px;"></textarea>
-            
-            <select name="category_id" required style="padding: 10px;">
-                <option value="">Select Category</option>
-                <?php foreach ($categories as $cat): ?>
-                    <option value="<?php echo $cat['category_id']; ?>"><?php echo htmlspecialchars($cat['category_name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-            
-            <input type="number" step="0.01" name="price" placeholder="Price (RM)" required style="padding: 10px;">
-            <input type="number" name="stock_quantity" placeholder="Stock Quantity" required style="padding: 10px;">
-            <input type="text" name="image_url" placeholder="Image Filename (e.g. shoe1.jpg)" style="padding: 10px;">
-            
-            <button type="submit" class="btn-primary" style="padding: 10px; background-color: #333; color: white; border: none; cursor: pointer;">Add Product</button>
-        </form>
-    </div>
-    
-    <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3>Manage Existing Products</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-            <tr style="border-bottom: 2px solid #eee; text-align: left;">
-                <th style="padding: 10px;">ID / SKU</th>
-                <th style="padding: 10px;">Name</th>
-                <th style="padding: 10px;">Image</th>
-                <th style="padding: 10px;">Price / Stock</th>
-                <th style="padding: 10px;">Actions</th>
-            </tr>
-            
-            <?php
-            $prod_result = $conn->query("SELECT * FROM products ORDER BY product_id DESC");
-            if ($prod_result && $prod_result->num_rows > 0) {
-                while ($row = $prod_result->fetch_assoc()) {
-                    ?>
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 10px;"><?php echo $row['product_id']; ?> <br> <small><?php echo htmlspecialchars($row['sku']); ?></small></td>
-                        <td style="padding: 10px;"><?php echo htmlspecialchars($row['product_name']); ?></td>
-                        <td style="padding: 10px;">
-                            <img src="assets/images/<?php echo htmlspecialchars($row['image_url']); ?>" style="width: 50px; height: 50px; object-fit: cover;" alt="img">
-                        </td>
-                        <td style="padding: 10px;">
-                            <form method="POST" action="admin_product.php" style="display: flex; gap: 5px;">
-                                <input type="hidden" name="update_product" value="1">
-                                <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
-                                <input type="number" step="0.01" name="price" value="<?php echo $row['price']; ?>" style="width: 80px; padding: 5px;" title="Price">
-                                <input type="number" name="stock_quantity" value="<?php echo $row['stock_quantity']; ?>" style="width: 60px; padding: 5px;" title="Stock">
-                                <button type="submit" style="padding: 5px 10px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 3px;">Update</button>
-                            </form>
-                        </td>
-                        <td style="padding: 10px;">
-                            <form method="POST" action="admin_product.php" onsubmit="return confirm('Are you sure you want to delete this product?');">
-                                <input type="hidden" name="delete_product" value="1">
-                                <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
-                                <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer;">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
+        /* ── Top Header ── */
+        .top-header {
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            height: 60px;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .top-header .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+        .top-header nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #555;
+            font-size: 14px;
+        }
+        .top-header nav a:hover { color: #111; }
+        .top-header .user-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* ── Body Layout ── */
+        .page-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 220px;
+            min-width: 220px;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            min-height: calc(100vh - 60px);
+        }
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #aaa;
+            letter-spacing: 1px;
+            padding: 10px 25px 6px;
+            text-transform: uppercase;
+        }
+        .sidebar a {
+            padding: 12px 25px;
+            text-decoration: none;
+            color: #555;
+            display: block;
+            border-left: 4px solid transparent;
+            font-size: 14px;
+        }
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #f0f0f0;
+            border-left: 4px solid #333;
+            font-weight: bold;
+            color: #333;
+        }
+        .sidebar .logout {
+            margin-top: auto;
+            padding: 12px 25px;
+            color: #cc0000;
+            font-size: 14px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar .logout:hover {
+            background-color: #fff0f0;
+            border-left-color: #cc0000;
+        }
+
+        /* ── Main Content ── */
+        .main-content {
+            flex: 1;
+            padding: 36px 40px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 24px;
+            color: #222;
+        }
+
+        /* ── Panels ── */
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 28px;
+        }
+        .panel h3 {
+            margin: 0 0 18px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* ── Form ── */
+        .add-form {
+            display: grid;
+            gap: 12px;
+            max-width: 560px;
+        }
+        .add-form input,
+        .add-form textarea,
+        .add-form select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .add-form textarea { resize: vertical; }
+        .btn-primary {
+            padding: 11px;
+            background-color: #222;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary:hover { background-color: #444; }
+
+        /* ── Products Table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 11px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        th {
+            color: #777;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #eee;
+        }
+        .inline-form {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .inline-form input[type="number"] {
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .btn-update {
+            padding: 5px 12px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-update:hover { background: #3d9140; }
+        .btn-delete {
+            padding: 5px 12px;
+            background: #e53935;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-delete:hover { background: #b71c1c; }
+        .product-img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        small { color: #888; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Top Header ── -->
+    <header class="top-header">
+        <a href="index.php" class="logo">SNEAKERS STORE</a>
+        <nav>
+            <a href="index.php">All</a>
+            <a href="index.php?cat=men">Men</a>
+            <a href="index.php?cat=women">Women</a>
+            <a href="index.php?cat=kids">Kids</a>
+        </nav>
+        <div class="user-info">
+            Hello, <strong><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Admin'); ?></strong>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+
+        <!-- ── Sidebar ── -->
+        <aside class="sidebar">
+            <div class="sidebar-label">Admin Controls</div>
+            <a href="admin_dashboard.php">Inventory</a>
+            <a href="admin_product.php" class="active">Products</a>
+            <a href="admin_orders.php">Orders</a>
+            <a href="admin_customers.php">Customers</a>
+            <a href="admin_marketing.php">Marketing</a>
+            <a href="logout.php" class="logout">Log Out</a>
+        </aside>
+
+        <!-- ── Main Content ── -->
+        <div class="main-content">
+            <h1 class="page-title">Admin Catalog Management</h1>
+
+            <!-- Add Product -->
+            <div class="panel">
+                <h3>Add New Product</h3>
+                <form method="POST" action="admin_product.php" class="add-form">
+                    <input type="hidden" name="add_product" value="1">
+                    <input type="text" name="sku" placeholder="SKU (e.g. SNK-001)" required>
+                    <input type="text" name="product_name" placeholder="Product Name" required>
+                    <textarea name="product_description" placeholder="Description" rows="3"></textarea>
+                    <select name="category_id" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat['category_id']; ?>">
+                                <?php echo htmlspecialchars($cat['category_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="number" step="0.01" name="price" placeholder="Price (RM)" required>
+                    <input type="number" name="stock_quantity" placeholder="Stock Quantity" required>
+                    <input type="text" name="image_url" placeholder="Image Filename (e.g. shoe1.jpg)">
+                    <button type="submit" class="btn-primary">Add Product</button>
+                </form>
+            </div>
+
+            <!-- Manage Products -->
+            <div class="panel">
+                <h3>Manage Existing Products</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID / SKU</th>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Price / Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php
-                }
-            } else {
-                echo '<tr><td colspan="5" style="padding: 15px;">No products found.</td></tr>';
-            }
-            ?>
-        </table>
-    </div>
-</div>
+                    $prod_result = $conn->query("SELECT * FROM products ORDER BY product_id DESC");
+                    if ($prod_result && $prod_result->num_rows > 0):
+                        while ($row = $prod_result->fetch_assoc()): ?>
+                        <tr>
+                            <td>
+                                <?php echo $row['product_id']; ?><br>
+                                <small><?php echo htmlspecialchars($row['sku']); ?></small>
+                            </td>
+                            <td><?php echo htmlspecialchars($row['product_name']); ?></td>
+                            <td>
+                                <img src="assets/images/<?php echo htmlspecialchars($row['image_url']); ?>"
+                                     class="product-img" alt="product image">
+                            </td>
+                            <td>
+                                <form method="POST" action="admin_product.php" class="inline-form">
+                                    <input type="hidden" name="update_product" value="1">
+                                    <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
+                                    <input type="number" step="0.01" name="price"
+                                           value="<?php echo $row['price']; ?>" style="width:80px;" title="Price">
+                                    <input type="number" name="stock_quantity"
+                                           value="<?php echo $row['stock_quantity']; ?>" style="width:60px;" title="Stock">
+                                    <button type="submit" class="btn-update">Update</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form method="POST" action="admin_product.php"
+                                      onsubmit="return confirm('Delete this product?');">
+                                    <input type="hidden" name="delete_product" value="1">
+                                    <input type="hidden" name="product_id" value="<?php echo $row['product_id']; ?>">
+                                    <button type="submit" class="btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <?php endwhile;
+                    else: ?>
+                        <tr><td colspan="5" style="text-align:center; color:#888;">No products found.</td></tr>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
 
+        </div><!-- /main-content -->
+    </div><!-- /page-wrapper -->
+
+<?php $conn->close(); ?>
 </body>
 </html>

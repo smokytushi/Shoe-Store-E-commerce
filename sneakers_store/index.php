@@ -4,19 +4,18 @@ require_once 'includes/db_connect.php';
 ?>
 
 <style>
-    /* Specific CSS for Homepage */
+    
     .hero-section {
-        display: flex;
-        background-color: #e3e8e5; 
-        height: 400px;
-        margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    background: url('assets/images/header.jpg') center center / cover no-repeat;
+    position: relative;
     }
+
     .hero-img {
-        flex: 1;
-        background-color: #ddd;
-        background-image: url('assets/images/header.jpg');
-        background-size: cover;
-        background-position: center;
+        display: none;
     }
     .hero-text {
         flex: 1;
@@ -75,18 +74,33 @@ require_once 'includes/db_connect.php';
 <div class="product-grid">
     <?php
     // Fetch 3 latest products
-    $sql = "SELECT product_id, product_name, price, image_url FROM products ORDER BY created_at DESC LIMIT 3";
+    $sql = "SELECT product_id, product_name, price, image_url
+            FROM products
+            ORDER BY created_at DESC
+            LIMIT 3";
+
     if ($result = $conn->query($sql)) {
+
         while ($row = $result->fetch_assoc()) {
-            // Use placeholder if image is missing
-            $img = !empty($row['image_url']) ? htmlspecialchars($row['image_url']) : 'https://via.placeholder.com/300x200?text=No+Image';
-            
+
+            $img = !empty($row['image_url'])
+                ? 'assets/images/' . htmlspecialchars($row['image_url'])
+                : 'assets/images/placeholder.jpg';
+
             echo '<a href="product_details.php?id=' . $row['product_id'] . '" class="product-card">';
-            echo '<img src="' . $img . '" class="product-image" alt="Sneaker">';
-            echo '<h3>' . htmlspecialchars($row['product_name']) . '</h3>';
-            echo '<p class="price">RM ' . number_format($row['price'], 2) . '</p>';
+
+                echo '<div class="product-image-container">';
+                    echo '<img src="' . $img . '" alt="' . htmlspecialchars($row['product_name']) . '" class="product-image">';
+                echo '</div>';
+
+                echo '<div class="product-info">';
+                    echo '<h3>' . htmlspecialchars($row['product_name']) . '</h3>';
+                    echo '<p class="price">RM ' . number_format($row['price'], 2) . '</p>';
+                echo '</div>';
+
             echo '</a>';
         }
+
         $result->free();
     }
     ?>
