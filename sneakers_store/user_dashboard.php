@@ -60,6 +60,22 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $recent_orders = $stmt->get_result();
 
+// ── Store notifications (from admin) ─────────────────────────────────────────
+$notifications = [];
+$stmt_n = $conn->prepare("
+    SELECT n.message, n.created_at, u.full_name AS sent_by
+    FROM notifications n
+    JOIN users u ON n.admin_id = u.user_id
+    ORDER BY n.created_at DESC
+    LIMIT 5
+");
+$stmt_n->execute();
+$notif_result = $stmt_n->get_result();
+while ($notif = $notif_result->fetch_assoc()) {
+    $notifications[] = $notif;
+}
+$stmt_n->close();
+
 // ── Wishlist preview (last 3) ─────────────────────────────────────────────────
 $stmt_w = $conn->prepare("
     SELECT p.product_name, p.price
@@ -200,6 +216,36 @@ $wishlist_count = $wishlist_items->num_rows;
         }
         .panel-link:hover { text-decoration: underline; }
 
+        /* ── Notifications ── */
+        .notif-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item p {
+            margin: 0 0 4px;
+            color: #333;
+        }
+        .notif-meta {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .notif-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #e67e22;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+        .notif-row {
+            display: flex;
+            align-items: flex-start;
+        }
+
         /* ── Empty states ── */
         .empty-state {
             color: #aaa;
@@ -290,6 +336,30 @@ $wishlist_count = $wishlist_items->num_rows;
             </div>
 
         </div>
+
+        <!-- ── Store Notifications ── -->
+        <div class="panel" style="margin-top: 20px;">
+            <h2>Store Notifications</h2>
+            <?php if (empty($notifications)): ?>
+                <p class="empty-state">No notifications at this time.</p>
+            <?php else: ?>
+                <?php foreach ($notifications as $notif): ?>
+                <div class="notif-item">
+                    <div class="notif-row">
+                        <span class="notif-dot"></span>
+                        <div>
+                            <p><?= htmlspecialchars($notif['message']) ?></p>
+                            <span class="notif-meta">
+                                <?= date('d M Y, g:i A', strtotime($notif['created_at'])) ?>
+                                &nbsp;·&nbsp; From: <?= htmlspecialchars($notif['sent_by']) ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
     </div>
 
 </body>

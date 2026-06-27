@@ -12,7 +12,7 @@ require_once 'includes/db_connect.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HYPE Sneakers Store</title>
     <style>
-        /* Vanilla CSS Global & Header Styles */
+       
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -64,7 +64,7 @@ require_once 'includes/db_connect.php';
 
 <div class="navbar">
     <div class="logo">
-        <a href="index.php">Sneakers Store</a>
+        <a href="index.php">HYPE Sneakers Store</a>
     </div>
     
     <div class="nav-links">
@@ -75,8 +75,17 @@ require_once 'includes/db_connect.php';
     </div>
     
     <div class="nav-actions">
-        <form action="browse.php" method="GET" style="margin: 0;">
-            <input type="text" name="search" class="search-bar" placeholder="Search...">
+        <form action="browse.php" method="GET" class="search-form">
+            <input
+                type="text"
+                name="search"
+                placeholder="Search shoes..."
+                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+            >
+
+            <button type="submit">
+                Search
+            </button>
         </form>
         
         <a href="wishlist.php" class="btn-icon">♡</a>

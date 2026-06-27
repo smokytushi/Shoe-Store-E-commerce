@@ -62,7 +62,7 @@ if ($result = $conn->query($sql_fetch)) {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #eef8f2;
+            background-color: #fcfbee;
             display: flex;
             min-height: 100vh;
         }

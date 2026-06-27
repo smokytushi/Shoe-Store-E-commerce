@@ -48,48 +48,19 @@ if ($result = $conn->query($fetch_sql)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Management | Sneakers Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        /* Vanilla CSS - Inheriting the clean dashboard architecture */
+        .navbar { display: none !important; }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #eef8f2;
+            background-color: #fcfbee;
             display: flex;
             min-height: 100vh;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: 250px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-        }
-        .sidebar-logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .sidebar a {
-            padding: 15px 25px;
-            text-decoration: none;
-            color: #555;
-            display: block;
-            border-left: 4px solid transparent;
-        }
-        .sidebar a:hover, .sidebar a.active {
-            background-color: #f0f0f0;
-            border-left: 4px solid #333;
-            font-weight: bold;
-            color: #333;
-        }
-
-        /* Main Content */
+        
         .main-content {
             flex: 1;
             padding: 40px;
