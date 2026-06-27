@@ -12,8 +12,10 @@ require_once 'includes/db_connect.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Feedbacks | Admin Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; display: flex; min-height: 100vh; }
+        .navbar { display: none !important; }
+        body { font-family: Arial, sans-serif; background-color: #fcfbee; margin: 0; display: flex; min-height: 100vh; }
         .main-content { flex: 1; padding: 40px; }
         .panel { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }

@@ -52,49 +52,19 @@ if ($cat_result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Products | Sneakers Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
+        .navbar { display: none !important; }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #eef8f2;
+            background-color: #fefff1;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* ── Top Header ── */
-        .top-header {
-            width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            height: 60px;
-            box-sizing: border-box;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .top-header .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-            text-decoration: none;
-        }
-        .top-header nav a {
-            margin-left: 20px;
-            text-decoration: none;
-            color: #555;
-            font-size: 14px;
-        }
-        .top-header nav a:hover { color: #111; }
-        .top-header .user-info {
-            font-size: 14px;
-            color: #555;
-        }
 
         /* ── Body Layout ── */
         .page-wrapper {
@@ -102,56 +72,6 @@ if ($cat_result) {
             flex: 1;
         }
 
-        /* ── Sidebar ── */
-        .sidebar {
-            width: 220px;
-            min-width: 220px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            min-height: calc(100vh - 60px);
-        }
-        .sidebar-label {
-            font-size: 11px;
-            font-weight: bold;
-            color: #aaa;
-            letter-spacing: 1px;
-            padding: 10px 25px 6px;
-            text-transform: uppercase;
-        }
-        .sidebar a {
-            padding: 12px 25px;
-            text-decoration: none;
-            color: #555;
-            display: block;
-            border-left: 4px solid transparent;
-            font-size: 14px;
-        }
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #f0f0f0;
-            border-left: 4px solid #333;
-            font-weight: bold;
-            color: #333;
-        }
-        .sidebar .logout {
-            margin-top: auto;
-            padding: 12px 25px;
-            color: #cc0000;
-            font-size: 14px;
-            cursor: pointer;
-            border-left: 4px solid transparent;
-            text-decoration: none;
-            display: block;
-        }
-        .sidebar .logout:hover {
-            background-color: #fff0f0;
-            border-left-color: #cc0000;
-        }
-
-        /* ── Main Content ── */
         .main-content {
             flex: 1;
             padding: 36px 40px;
@@ -267,34 +187,8 @@ if ($cat_result) {
     </style>
 </head>
 <body>
-
-    <!-- ── Top Header ── -->
-    <header class="top-header">
-        <a href="index.php" class="logo">SNEAKERS STORE</a>
-        <nav>
-            <a href="index.php">All</a>
-            <a href="index.php?cat=men">Men</a>
-            <a href="index.php?cat=women">Women</a>
-            <a href="index.php?cat=kids">Kids</a>
-        </nav>
-        <div class="user-info">
-            Hello, <strong><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Admin'); ?></strong>
-        </div>
-    </header>
-
     <div class="page-wrapper">
-
-        <!-- ── Sidebar ── -->
-        <aside class="sidebar">
-            <div class="sidebar-label">Admin Controls</div>
-            <a href="admin_dashboard.php">Inventory</a>
-            <a href="admin_product.php" class="active">Products</a>
-            <a href="admin_orders.php">Orders</a>
-            <a href="admin_customers.php">Customers</a>
-            <a href="admin_marketing.php">Marketing</a>
-            <a href="logout.php" class="logout">Log Out</a>
-        </aside>
-
+    <?php include 'includes/sidebar.php'; ?>
         <!-- ── Main Content ── -->
         <div class="main-content">
             <h1 class="page-title">Admin Catalog Management</h1>

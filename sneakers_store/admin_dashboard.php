@@ -1,6 +1,5 @@
 <?php
 
-
 session_start();
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin')) {
@@ -8,9 +7,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin')) {
     exit();
 }
 
-
 require_once 'includes/db_connect.php';
-
 
 $products = [];
 $sql = "SELECT sku, product_name, product_description, stock_quantity
@@ -45,12 +42,14 @@ foreach ($products as $product) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Sneakers Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
+        .navbar { display: none !important; }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #eef8f2;
+            background-color: #fdfef3;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -95,56 +94,6 @@ foreach ($products as $product) {
             flex: 1;
         }
 
-        /* ── Sidebar ── */
-        .sidebar {
-            width: 220px;
-            min-width: 220px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-            min-height: calc(100vh - 60px);
-        }
-        .sidebar-label {
-            font-size: 11px;
-            font-weight: bold;
-            color: #aaa;
-            letter-spacing: 1px;
-            padding: 10px 25px 6px;
-            text-transform: uppercase;
-        }
-        .sidebar a {
-            padding: 12px 25px;
-            text-decoration: none;
-            color: #555;
-            display: block;
-            border-left: 4px solid transparent;
-            font-size: 14px;
-        }
-        .sidebar a:hover,
-        .sidebar a.active {
-            background-color: #f0f0f0;
-            border-left: 4px solid #333;
-            font-weight: bold;
-            color: #333;
-        }
-        .sidebar .logout {
-            margin-top: auto;
-            padding: 12px 25px;
-            color: #cc0000;
-            font-size: 14px;
-            cursor: pointer;
-            border-left: 4px solid transparent;
-            text-decoration: none;
-            display: block;
-        }
-        .sidebar .logout:hover {
-            background-color: #fff0f0;
-            border-left-color: #cc0000;
-        }
-
-        /* ── Main Content ── */
         .main-content {
             flex: 1;
             padding: 36px 40px;
@@ -234,7 +183,7 @@ foreach ($products as $product) {
         }
         .btn-action:hover { background-color: #444; }
 
-        /* ── Stock Activity Feed ── */
+        /* ── Activity Feed ── */
         .activity-item {
             font-size: 13px;
             color: #555;
@@ -247,34 +196,8 @@ foreach ($products as $product) {
     </style>
 </head>
 <body>
-
-    <!-- ── Top Header ── -->
-    <header class="top-header">
-        <a href="index.php" class="logo">SNEAKERS STORE</a>
-        <nav>
-            <a href="index.php">All</a>
-            <a href="index.php?cat=men">Men</a>
-            <a href="index.php?cat=women">Women</a>
-            <a href="index.php?cat=kids">Kids</a>
-        </nav>
-        <div class="user-info">
-            Hello, <strong><?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Admin'); ?></strong>
-        </div>
-    </header>
-
     <div class="page-wrapper">
-
-        <!-- ── Sidebar ── -->
-        <aside class="sidebar">
-            <div class="sidebar-label">Admin Controls</div>
-            <a href="admin_dashboard.php" class="active">Inventory</a>
-            <a href="admin_product.php">Products</a>
-            <a href="admin_orders.php">Orders</a>
-            <a href="admin_customers.php">Customers</a>
-            <a href="admin_marketing.php">Marketing</a>
-            <a href="logout.php" class="logout">Log Out</a>
-        </aside>
-
+    <?php include 'includes/sidebar.php'; ?>
         <!-- ── Main Content ── -->
         <div class="main-content">
             <h1 class="page-title">Inventory Dashboard</h1>
@@ -296,67 +219,13 @@ foreach ($products as $product) {
                     <p class="stat-value" style="color:#cc0000;">
                         <?php echo $low_stock_alerts; ?> Products
                     </p>
-<<<<<<< HEAD
                 </div>
-=======
-            </div>
-        </div>
-
-        <div class="dashboard-layout">
-            <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0; font-size: 18px;">CURRENT INVENTORY</h2>
-                    <a href="admin_product.php" class="btn-action">+ Add New Product</a>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item ID</th>
-                            <th>Product Name</th>
-                            <th>Product Description</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach($products as $product): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($product['sku']); ?></td>
-                            <td><?php echo htmlspecialchars($product['product_name']); ?></td>
-                            <td><?php echo htmlspecialchars($product['product_description']); ?></td>
-                            <td><strong><?php echo htmlspecialchars($product['stock_quantity']); ?></strong></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        
-                        <?php if(empty($products)): ?>
-                        <tr>
-                            <td colspan="4" style="text-align: center;">No products in inventory.</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
             </div>
 
-            <div class="panel">
-                <h2 style="margin: 0 0 15px 0; font-size: 16px;">ACTIVE SHIPMENTS (TRACKING)</h2>
-                <?php
-                $track_sql = "SELECT order_id, tracking_number, current_status FROM delivery_status WHERE current_status != 'Delivered' ORDER BY updated_at DESC LIMIT 5";
-                $track_res = $conn->query($track_sql);
-                if ($track_res && $track_res->num_rows > 0) {
-                    while($t = $track_res->fetch_assoc()) {
-                        echo '<div style="font-size: 13px; color: #555; border-left: 2px solid #e67e22; padding-left: 10px; margin-bottom: 15px;">';
-                        echo '<strong>Order #' . $t['order_id'] . '</strong> - ' . ($t['tracking_number'] ? htmlspecialchars($t['tracking_number']) : 'No tracking set') . '<br>';
-                        echo '<span style="color:#e67e22;">' . htmlspecialchars($t['current_status']) . '</span>';
-                        echo '</div>';
-                    }
-                } else {
-                    echo '<div style="font-size: 13px; color: #555;">No active shipments.</div>';
-                }
-                ?>
->>>>>>> 19202a7530004290ac4060ee2349c7d5b200cfaf
-            </div>
-
-            <!-- Inventory Table + Activity Feed -->
+            <!-- Inventory Table + Side Panels -->
             <div class="dashboard-layout">
+
+                <!-- Left: Inventory Table -->
                 <div class="panel">
                     <div class="panel-header">
                         <h2>Current Inventory</h2>
@@ -389,12 +258,36 @@ foreach ($products as $product) {
                     </table>
                 </div>
 
-                <div class="panel">
-                    <h2 style="margin:0 0 16px; font-size:15px; color:#333;">Recent Stock Updates</h2>
-                    <div class="activity-item">10 new sizes added to AJ1 High by Admin</div>
-                    <div class="activity-item">15 units of Nike Dunk Low Panda sold</div>
+                <!-- Right: Active Shipments + Recent Stock Updates -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+
+                    <div class="panel">
+                        <h2 style="margin: 0 0 15px; font-size: 15px; color: #333;">Active Shipments</h2>
+                        <?php
+                        $track_sql = "SELECT order_id, tracking_number, current_status FROM delivery_status WHERE current_status != 'Delivered' ORDER BY updated_at DESC LIMIT 5";
+                        $track_res = $conn->query($track_sql);
+                        if ($track_res && $track_res->num_rows > 0) {
+                            while ($t = $track_res->fetch_assoc()) {
+                                echo '<div style="font-size: 13px; color: #555; border-left: 2px solid #e67e22; padding-left: 10px; margin-bottom: 15px;">';
+                                echo '<strong>Order #' . $t['order_id'] . '</strong> — ' . ($t['tracking_number'] ? htmlspecialchars($t['tracking_number']) : 'No tracking set') . '<br>';
+                                echo '<span style="color:#e67e22;">' . htmlspecialchars($t['current_status']) . '</span>';
+                                echo '</div>';
+                            }
+                        } else {
+                            echo '<p style="font-size: 13px; color: #aaa;">No active shipments.</p>';
+                        }
+                        ?>
+                    </div>
+
+                    <div class="panel">
+                        <h2 style="margin: 0 0 16px; font-size: 15px; color: #333;">Recent Stock Updates</h2>
+                        <div class="activity-item">10 new sizes added to AJ1 High by Admin</div>
+                        <div class="activity-item">15 units of Nike Dunk Low Panda sold</div>
+                    </div>
+
                 </div>
-            </div>
+
+            </div><!-- /dashboard-layout -->
 
         </div><!-- /main-content -->
     </div><!-- /page-wrapper -->

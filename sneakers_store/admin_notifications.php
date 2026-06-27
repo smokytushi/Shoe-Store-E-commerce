@@ -55,7 +55,9 @@ if ($result = $conn->query($sql_fetch)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marketing & Notifications | Sneakers Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
+        .navbar { display: none !important; }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -65,37 +67,7 @@ if ($result = $conn->query($sql_fetch)) {
             min-height: 100vh;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: 250px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-        }
-        .sidebar-logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .sidebar a {
-            padding: 15px 25px;
-            text-decoration: none;
-            color: #555;
-            display: block;
-            border-left: 4px solid transparent;
-        }
-        .sidebar a:hover, .sidebar a.active {
-            background-color: #f0f0f0;
-            border-left: 4px solid #333;
-            font-weight: bold;
-            color: #333;
-        }
-
-        /* Main Content */
+        
         .main-content {
             flex: 1;
             padding: 40px;
@@ -169,16 +141,7 @@ if ($result = $conn->query($sql_fetch)) {
     </style>
 </head>
 <body>
-
-    <div class="sidebar">
-        <div class="sidebar-logo">Sneakers Store</div>
-        <a href="admin_dashboard.php">Inventory Dashboard</a>
-        <a href="admin_product.php">Manage Products</a>
-        <a href="admin_deliveries.php">Order Management</a>
-        <a href="admin_customers.php">Customers</a>
-        <a href="admin_notifications.php" class="active">Marketing</a>
-        <a href="logout.php" style="margin-top: auto; border-top: 1px solid #eee;">Log Out</a>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
 
     <div class="main-content">
         

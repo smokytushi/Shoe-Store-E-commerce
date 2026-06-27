@@ -22,7 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_refund'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Refund | Sneakers Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
+        .navbar { display: none !important; }
         body { font-family: Arial, sans-serif; background-color: #eef8f2; margin: 0; display: flex; min-height: 100vh; }
         .main-content { flex: 1; padding: 40px; }
         .panel { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-width: 600px; margin: auto;}

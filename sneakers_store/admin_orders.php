@@ -112,7 +112,7 @@ if ($row = $rev_result->fetch_assoc()) $revenue = $row['rev'] ?? 0;
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #eef8f2;
+            background-color: #f7f8ee;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
