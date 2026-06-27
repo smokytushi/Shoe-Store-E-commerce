@@ -85,8 +85,9 @@ CREATE TABLE payments (
 CREATE TABLE delivery_status (
     delivery_id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
+    tracking_number VARCHAR(100) DEFAULT NULL,
     expected_delivery DATE NOT NULL,
-    current_status ENUM('Pending', 'Out for Delivery', 'Delivered') DEFAULT 'Pending',
+    current_status ENUM('Pending', 'Shipped', 'Out for Delivery', 'Delivered') DEFAULT 'Pending',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 );
@@ -98,4 +99,29 @@ CREATE TABLE notifications (
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 10. FEEDBACKS TABLE
+CREATE TABLE feedbacks (
+    feedback_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    order_id INT NOT NULL,
+    rating INT NOT NULL CHECK(rating BETWEEN 1 AND 5),
+    comments TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+
+-- 11. REFUNDS TABLE
+CREATE TABLE refunds (
+    refund_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    order_id INT NOT NULL,
+    reason TEXT NOT NULL,
+    refund_status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 );

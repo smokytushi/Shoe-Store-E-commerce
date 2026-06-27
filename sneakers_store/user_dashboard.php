@@ -207,29 +207,36 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 
         <div class="content-grid">
             <div class="panel">
-                <h2>Recent Orders</h2>
+                <h2>Live Tracking & Recent Orders</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Order ID</th>
                             <th>Date</th>
+                            <th>Tracking #</th>
                             <th>Status</th>
-                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>#KV1098</td>
-                            <td>Oct 26, 2023</td>
-                            <td class="status-shipped">Shipped</td>
-                            <td>RM 195.00</td>
-                        </tr>
-                        <tr>
-                            <td>#KV1097</td>
-                            <td>Oct 12, 2023</td>
-                            <td class="status-delivered">Delivered</td>
-                            <td>RM 220.00</td>
-                        </tr>
+                        <?php
+                        $orders_sql = "SELECT o.order_id, o.order_date, ds.tracking_number, ds.current_status 
+                                       FROM orders o 
+                                       LEFT JOIN delivery_status ds ON o.order_id = ds.order_id 
+                                       WHERE o.user_id = $user_id ORDER BY o.order_id DESC LIMIT 5";
+                        $orders_res = $conn->query($orders_sql);
+                        if ($orders_res && $orders_res->num_rows > 0) {
+                            while($o_row = $orders_res->fetch_assoc()) {
+                                echo "<tr>";
+                                echo "<td>#" . $o_row['order_id'] . "</td>";
+                                echo "<td>" . date('M d, Y', strtotime($o_row['order_date'])) . "</td>";
+                                echo "<td>" . ($o_row['tracking_number'] ? htmlspecialchars($o_row['tracking_number']) : 'N/A') . "</td>";
+                                echo "<td style='font-weight:bold; color:#e67e22;'>" . ($o_row['current_status'] ? htmlspecialchars($o_row['current_status']) : 'Pending') . "</td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='4'>You have no recent orders.</td></tr>";
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>

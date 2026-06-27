@@ -253,13 +253,21 @@ foreach ($products as $product) {
             </div>
 
             <div class="panel">
-                <h2 style="margin: 0 0 15px 0; font-size: 16px;">RECENT STOCK UPDATES</h2>
-                <div style="font-size: 13px; color: #555; border-left: 2px solid #222; padding-left: 10px; margin-bottom: 15px;">
-                    10 New sizes added to AJ1 High by Admin
-                </div>
-                <div style="font-size: 13px; color: #555; border-left: 2px solid #222; padding-left: 10px;">
-                    15 Units of Nike Dunk Low Panda sold
-                </div>
+                <h2 style="margin: 0 0 15px 0; font-size: 16px;">ACTIVE SHIPMENTS (TRACKING)</h2>
+                <?php
+                $track_sql = "SELECT order_id, tracking_number, current_status FROM delivery_status WHERE current_status != 'Delivered' ORDER BY updated_at DESC LIMIT 5";
+                $track_res = $conn->query($track_sql);
+                if ($track_res && $track_res->num_rows > 0) {
+                    while($t = $track_res->fetch_assoc()) {
+                        echo '<div style="font-size: 13px; color: #555; border-left: 2px solid #e67e22; padding-left: 10px; margin-bottom: 15px;">';
+                        echo '<strong>Order #' . $t['order_id'] . '</strong> - ' . ($t['tracking_number'] ? htmlspecialchars($t['tracking_number']) : 'No tracking set') . '<br>';
+                        echo '<span style="color:#e67e22;">' . htmlspecialchars($t['current_status']) . '</span>';
+                        echo '</div>';
+                    }
+                } else {
+                    echo '<div style="font-size: 13px; color: #555;">No active shipments.</div>';
+                }
+                ?>
             </div>
         </div>
     </div>
