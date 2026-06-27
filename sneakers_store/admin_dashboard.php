@@ -296,7 +296,63 @@ foreach ($products as $product) {
                     <p class="stat-value" style="color:#cc0000;">
                         <?php echo $low_stock_alerts; ?> Products
                     </p>
+<<<<<<< HEAD
                 </div>
+=======
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 18px;">CURRENT INVENTORY</h2>
+                    <a href="admin_product.php" class="btn-action">+ Add New Product</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Product Name</th>
+                            <th>Product Description</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($products as $product): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($product['sku']); ?></td>
+                            <td><?php echo htmlspecialchars($product['product_name']); ?></td>
+                            <td><?php echo htmlspecialchars($product['product_description']); ?></td>
+                            <td><strong><?php echo htmlspecialchars($product['stock_quantity']); ?></strong></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        
+                        <?php if(empty($products)): ?>
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No products in inventory.</td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <h2 style="margin: 0 0 15px 0; font-size: 16px;">ACTIVE SHIPMENTS (TRACKING)</h2>
+                <?php
+                $track_sql = "SELECT order_id, tracking_number, current_status FROM delivery_status WHERE current_status != 'Delivered' ORDER BY updated_at DESC LIMIT 5";
+                $track_res = $conn->query($track_sql);
+                if ($track_res && $track_res->num_rows > 0) {
+                    while($t = $track_res->fetch_assoc()) {
+                        echo '<div style="font-size: 13px; color: #555; border-left: 2px solid #e67e22; padding-left: 10px; margin-bottom: 15px;">';
+                        echo '<strong>Order #' . $t['order_id'] . '</strong> - ' . ($t['tracking_number'] ? htmlspecialchars($t['tracking_number']) : 'No tracking set') . '<br>';
+                        echo '<span style="color:#e67e22;">' . htmlspecialchars($t['current_status']) . '</span>';
+                        echo '</div>';
+                    }
+                } else {
+                    echo '<div style="font-size: 13px; color: #555;">No active shipments.</div>';
+                }
+                ?>
+>>>>>>> 19202a7530004290ac4060ee2349c7d5b200cfaf
             </div>
 
             <!-- Inventory Table + Activity Feed -->
