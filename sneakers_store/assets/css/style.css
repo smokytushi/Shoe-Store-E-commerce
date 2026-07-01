@@ -8,7 +8,7 @@
 }
 
 body {
-    /* Uses system fonts to get that crisp, Helvetica-style look */
+   
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     background-color: #ffffff;
     color: #111111;
@@ -66,12 +66,12 @@ a {
     gap: 16px;
 }
 
-/* Nike-style Search Bar */
+
 .search-bar {
     padding: 10px 40px 10px 16px;
     background-color: #f5f5f5;
     border: none;
-    border-radius: 100px; /* Pill shape */
+    border-radius: 100px;
     font-size: 16px;
     font-family: inherit;
     outline: none;
@@ -103,7 +103,7 @@ a {
     min-height: 600px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Pushes text to the bottom */
+    justify-content: flex-end; 
     align-items: center;
     background-color: #f5f5f5;
     background-image: url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
@@ -133,7 +133,7 @@ a {
     margin-bottom: 24px;
 }
 
-/* Nike's signature pill buttons */
+
 .btn-primary {
     display: inline-block;
     background-color: #111111;
@@ -358,12 +358,11 @@ display:none;
 
 /* =========================================================
    DASHBOARD SIDEBAR (sidebar.php)
-   Nike Aesthetic: Clean, borderless, typography-focused
 ========================================================= */
 .sidebar {
     width: 260px;
     background-color: #ffffff;
-    border-right: 1px solid #e5e5e5; /* Subtle separation instead of heavy shadow */
+    border-right: 1px solid #e5e5e5; 
     display: flex;
     flex-direction: column;
     padding: 40px 0 40px 40px;
@@ -397,7 +396,7 @@ display:none;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex: 1; /* Pushes the footer to the bottom */
+    flex: 1; 
 }
 
 .sidebar a {
@@ -411,12 +410,12 @@ display:none;
     width: fit-content;
 }
 
-/* Nike hover effect: Text goes black */
+
 .sidebar a:hover {
     color: #111111;
 }
 
-/* The Active State: Bold black text with a subtle left indicator */
+
 .sidebar a.active {
     color: #111111;
     font-weight: 700;
@@ -439,7 +438,7 @@ display:none;
     margin-top: auto;
     padding-top: 20px;
     border-top: 1px solid #e5e5e5;
-    margin-right: 40px; /* Aligns border with text */
+    margin-right: 40px; 
 }
 
 .logout-link {
